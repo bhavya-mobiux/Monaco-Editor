@@ -20,61 +20,120 @@ monaco.languages.register({
 
 // create Monaco editor
 const value = `a = 10`;
+const editorModel: monaco.editor.ITextModel = monaco.editor.createModel(
+  value,
+  "python",
+  monaco.Uri.parse("immemory://model.python")
+);
+
 const a = monaco.editor.create(document.getElementById("container")!, {
-  model: monaco.editor.createModel(
-    value,
-    "python",
-    monaco.Uri.parse("immemory://model.python")
-  ),
+  model: editorModel,
   glyphMargin: true,
   lightbulb: {
     enabled: true,
   },
 });
 
-// a.onDidChangeModelContent((event: any) => {
-//   console.log(JSON.stringify(event.changes));
-//   console.log("Text: ", event.changes[0].text);
+interface AssessEvent {
+  action: string | null;
+  delta: {
+    lines: any;
+    start: { row: any; column: any };
+    end: { row: any; column: any };
+  };
+}
 
-//   let action = null;
-//   if (event.changes[0].text === "\n") {
-//     // Insert new line
-//     action = "insert";
-//   } else if (event.changes[0].text === "") {
-//     action = "remove";
-//   } else if (
-//     event.changes[0].range.startColumn === event.changes[0].range.endColumn
+let allEvents: AssessEvent[] = [];
+
+function handleMonacoContentChange(event: any) {
+  let action = null;
+  if (event.changes[0].text === "\n") {
+    // Insert new line
+    action = "insert";
+  } else if (event.changes[0].text === "") {
+    action = "remove";
+  } else if (
+    event.changes[0].range.startColumn === event.changes[0].range.endColumn
+  ) {
+    action = "insert";
+  } else if (
+    event.changes[0].range.endColumn > event.changes[0].range.startColumn
+  ) {
+    action = "remove";
+  }
+  const retval = {
+    action,
+    delta: {
+      lines:
+        event.changes[0].text.length > 0
+          ? event.changes[0].text.split("\n")
+          : event.changes[0].text,
+      start: {
+        row: event.changes[0].range.startLineNumber,
+        column: event.changes[0].range.startColumn,
+      },
+      end: {
+        row: event.changes[0].range.endLineNumber,
+        column: event.changes[0].range.endColumn,
+      },
+    },
+  };
+  return retval;
+}
+
+a.onDidChangeModelContent((event: any) => {
+  const data = handleMonacoContentChange(event);
+  allEvents.push(data);
+});
+
+// Code to Playback Events
+
+// function playbackEvents(i: number) {
+//   i === 0 &&
+//     a.setPosition({
+//       column: allEvents[i].delta.start.column,
+//       lineNumber: allEvents[i].delta.start.row,
+//     });
+//   if (
+//     allEvents[i].action === "insert" &&
+//     allEvents[i].delta.lines.join("") === "\n"
 //   ) {
-//     action = "insert";
-//   } else if (
-//     event.changes[0].range.endColumn > event.changes[0].range.startColumn
-//   ) {
-//     action = "remove";
-//   }
-//   console.log(
-//     JSON.stringify({
-//       action,
-//       delta: {
-//         lines:
-//           event.changes[0].text.length > 0
-//             ? event.changes[0].text.split("\n")
-//             : event.changes[0].text,
-//         start: {
-//           row: event.changes[0].range.startLineNumber,
-//           column: event.changes[0].range.startColumn,
-//         },
-//         end: {
-//           row: event.changes[0].range.endLineNumber,
-//           column: event.changes[0].range.endColumn,
-//         },
+//     a.trigger(null, "type", { text: "\n" });
+//   } else if (allEvents[i].action === "remove") {
+//     // a.trigger("keyboard", "deleteLeft", null);
+//     let lineContent = editorModel.getLineContent(allEvents[i].delta.start.row);
+//     console.log(
+//       `Content at line ${allEvents[i].delta.end.row}: ${lineContent}`
+//     );
+//     lineContent = lineContent.substring(0, lineContent.length - 1);
+//     console.log(
+//       `New Content at line ${allEvents[i].delta.end.row}:  ${lineContent}`
+//     );
+//     a.executeEdits("my-source", [
+//       {
+//         range: new monaco.Range(
+//           allEvents[i].delta.start.row,
+//           1,
+//           allEvents[i].delta.start.row,
+//           lineContent.length + 1
+//         ),
+//         text: lineContent,
 //       },
-//     })
-//   );
-// });
+//     ]);
+//   } else {
+//     a.setPosition({
+//       column: allEvents[i].delta.end.column,
+//       lineNumber: allEvents[i].delta.end.row,
+//     });
+//     a.trigger("keyboard", "type", {
+//       text: allEvents[i].delta.lines.join(""),
+//     });
+//   }
+// }
 
-// var line = a.getPosition();
-
-console.log(a);
+// for (var i = 0; i < allEvents.length; i++) {
+//   playbackEvents(i);
+// }
 
 // install Monaco language client services
 MonacoServices.install(monaco);

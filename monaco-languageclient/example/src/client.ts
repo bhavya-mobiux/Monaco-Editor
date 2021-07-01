@@ -10,21 +10,29 @@ import {
 } from "monaco-languageclient";
 import normalizeUrl = require("normalize-url");
 const ReconnectingWebSocket = require("reconnecting-websocket");
+import CONFIG from "./config";
+
+const languageDetails = CONFIG.cpp;
 
 // register Monaco languages
+const LANGUAGE_ID = languageDetails.languageId;
+const EXTENSIONS = languageDetails.extensions;
+const MIMETYPES = languageDetails.mimetypes;
+const FILE_NAME = languageDetails.file;
+
 monaco.languages.register({
-  id: "python",
-  extensions: [".python"],
-  mimetypes: ["application/x-python-code"],
+  id: LANGUAGE_ID,
+  extensions: EXTENSIONS,
+  mimetypes: MIMETYPES,
 });
 
 // create Monaco editor
-const value = `a = 10`;
+const value = `public static void main(){}`;
 
 const editorModel: monaco.editor.ITextModel = monaco.editor.createModel(
   value,
-  "python",
-  monaco.Uri.parse("immemory://model.python")
+  LANGUAGE_ID, //java||python||c||cpp||go||js
+  monaco.Uri.parse(FILE_NAME) // file for monaco editor
 );
 
 const a = monaco.editor.create(document.getElementById("container")!, {
@@ -44,456 +52,7 @@ interface AssessEvent {
   };
 }
 
-let allEvents: AssessEvent[] = [
-  {
-    action: "insert",
-    delta: {
-      lines: ["\n"],
-      start: { row: 1, column: 7 },
-      end: { row: 1, column: 7 },
-    },
-  },
-  {
-    action: "insert",
-    delta: {
-      lines: ["p"],
-      start: { row: 2, column: 1 },
-      end: { row: 2, column: 1 },
-    },
-  },
-  {
-    action: "insert",
-    delta: {
-      lines: ["r"],
-      start: { row: 2, column: 2 },
-      end: { row: 2, column: 2 },
-    },
-  },
-  {
-    action: "insert",
-    delta: {
-      lines: ["i"],
-      start: { row: 2, column: 3 },
-      end: { row: 2, column: 3 },
-    },
-  },
-  {
-    action: "insert",
-    delta: {
-      lines: ["n"],
-      start: { row: 2, column: 4 },
-      end: { row: 2, column: 4 },
-    },
-  },
-  {
-    action: "insert",
-    delta: {
-      lines: ["t"],
-      start: { row: 2, column: 5 },
-      end: { row: 2, column: 5 },
-    },
-  },
-  {
-    action: "insert",
-    delta: {
-      lines: ["("],
-      start: { row: 2, column: 6 },
-      end: { row: 2, column: 6 },
-    },
-  },
-  {
-    action: "insert",
-    delta: {
-      lines: [")"],
-      start: { row: 2, column: 7 },
-      end: { row: 2, column: 7 },
-    },
-  },
-  {
-    action: "insert",
-    delta: {
-      lines: ['"'],
-      start: { row: 2, column: 7 },
-      end: { row: 2, column: 7 },
-    },
-  },
-  {
-    action: "insert",
-    delta: {
-      lines: ['"'],
-      start: { row: 2, column: 8 },
-      end: { row: 2, column: 8 },
-    },
-  },
-  {
-    action: "insert",
-    delta: {
-      lines: ["H"],
-      start: { row: 2, column: 8 },
-      end: { row: 2, column: 8 },
-    },
-  },
-  {
-    action: "insert",
-    delta: {
-      lines: ["e"],
-      start: { row: 2, column: 9 },
-      end: { row: 2, column: 9 },
-    },
-  },
-  {
-    action: "insert",
-    delta: {
-      lines: ["l"],
-      start: { row: 2, column: 10 },
-      end: { row: 2, column: 10 },
-    },
-  },
-  {
-    action: "insert",
-    delta: {
-      lines: ["l"],
-      start: { row: 2, column: 11 },
-      end: { row: 2, column: 11 },
-    },
-  },
-  {
-    action: "insert",
-    delta: {
-      lines: ["o"],
-      start: { row: 2, column: 12 },
-      end: { row: 2, column: 12 },
-    },
-  },
-  {
-    action: "insert",
-    delta: {
-      lines: [" "],
-      start: { row: 2, column: 13 },
-      end: { row: 2, column: 13 },
-    },
-  },
-  {
-    action: "insert",
-    delta: {
-      lines: ["B"],
-      start: { row: 2, column: 14 },
-      end: { row: 2, column: 14 },
-    },
-  },
-  {
-    action: "insert",
-    delta: {
-      lines: ["h"],
-      start: { row: 2, column: 15 },
-      end: { row: 2, column: 15 },
-    },
-  },
-  {
-    action: "insert",
-    delta: {
-      lines: ["a"],
-      start: { row: 2, column: 16 },
-      end: { row: 2, column: 16 },
-    },
-  },
-  {
-    action: "insert",
-    delta: {
-      lines: ["v"],
-      start: { row: 2, column: 17 },
-      end: { row: 2, column: 17 },
-    },
-  },
-  {
-    action: "insert",
-    delta: {
-      lines: ["y"],
-      start: { row: 2, column: 18 },
-      end: { row: 2, column: 18 },
-    },
-  },
-  {
-    action: "insert",
-    delta: {
-      lines: ["a"],
-      start: { row: 2, column: 19 },
-      end: { row: 2, column: 19 },
-    },
-  },
-  {
-    action: "remove",
-    delta: {
-      lines: "",
-      start: { row: 2, column: 21 },
-      end: { row: 2, column: 22 },
-    },
-  },
-  {
-    action: "remove",
-    delta: {
-      lines: "",
-      start: { row: 2, column: 20 },
-      end: { row: 2, column: 21 },
-    },
-  },
-  {
-    action: "remove",
-    delta: {
-      lines: "",
-      start: { row: 2, column: 19 },
-      end: { row: 2, column: 20 },
-    },
-  },
-  {
-    action: "remove",
-    delta: {
-      lines: "",
-      start: { row: 2, column: 18 },
-      end: { row: 2, column: 19 },
-    },
-  },
-  {
-    action: "insert",
-    delta: {
-      lines: ["y"],
-      start: { row: 2, column: 18 },
-      end: { row: 2, column: 18 },
-    },
-  },
-  {
-    action: "insert",
-    delta: {
-      lines: ["a"],
-      start: { row: 2, column: 19 },
-      end: { row: 2, column: 19 },
-    },
-  },
-  {
-    action: "insert",
-    delta: {
-      lines: ['"'],
-      start: { row: 2, column: 20 },
-      end: { row: 2, column: 20 },
-    },
-  },
-  {
-    action: "insert",
-    delta: {
-      lines: [")"],
-      start: { row: 2, column: 21 },
-      end: { row: 2, column: 21 },
-    },
-  },
-  {
-    action: "insert",
-    delta: {
-      lines: ["\n"],
-      start: { row: 2, column: 22 },
-      end: { row: 2, column: 22 },
-    },
-  },
-  {
-    action: "insert",
-    delta: {
-      lines: ["\n"],
-      start: { row: 3, column: 1 },
-      end: { row: 3, column: 1 },
-    },
-  },
-  {
-    action: "insert",
-    delta: {
-      lines: ["a"],
-      start: { row: 4, column: 1 },
-      end: { row: 4, column: 1 },
-    },
-  },
-  {
-    action: "insert",
-    delta: {
-      lines: [" "],
-      start: { row: 4, column: 2 },
-      end: { row: 4, column: 2 },
-    },
-  },
-  {
-    action: "insert",
-    delta: {
-      lines: ["="],
-      start: { row: 4, column: 3 },
-      end: { row: 4, column: 3 },
-    },
-  },
-  {
-    action: "insert",
-    delta: {
-      lines: [" "],
-      start: { row: 4, column: 4 },
-      end: { row: 4, column: 4 },
-    },
-  },
-  {
-    action: "remove",
-    delta: {
-      lines: "",
-      start: { row: 4, column: 4 },
-      end: { row: 4, column: 5 },
-    },
-  },
-  {
-    action: "remove",
-    delta: {
-      lines: "",
-      start: { row: 4, column: 3 },
-      end: { row: 4, column: 4 },
-    },
-  },
-  {
-    action: "remove",
-    delta: {
-      lines: "",
-      start: { row: 4, column: 2 },
-      end: { row: 4, column: 3 },
-    },
-  },
-  {
-    action: "remove",
-    delta: {
-      lines: "",
-      start: { row: 4, column: 1 },
-      end: { row: 4, column: 2 },
-    },
-  },
-  {
-    action: "insert",
-    delta: {
-      lines: ["b"],
-      start: { row: 4, column: 1 },
-      end: { row: 4, column: 1 },
-    },
-  },
-  {
-    action: "insert",
-    delta: {
-      lines: [" "],
-      start: { row: 4, column: 2 },
-      end: { row: 4, column: 2 },
-    },
-  },
-  {
-    action: "insert",
-    delta: {
-      lines: ["="],
-      start: { row: 4, column: 3 },
-      end: { row: 4, column: 3 },
-    },
-  },
-  {
-    action: "insert",
-    delta: {
-      lines: [" "],
-      start: { row: 4, column: 4 },
-      end: { row: 4, column: 4 },
-    },
-  },
-  {
-    action: "insert",
-    delta: {
-      lines: ["2"],
-      start: { row: 4, column: 5 },
-      end: { row: 4, column: 5 },
-    },
-  },
-  {
-    action: "insert",
-    delta: {
-      lines: ["0"],
-      start: { row: 4, column: 6 },
-      end: { row: 4, column: 6 },
-    },
-  },
-  {
-    action: "insert",
-    delta: {
-      lines: ["\n"],
-      start: { row: 4, column: 7 },
-      end: { row: 4, column: 7 },
-    },
-  },
-  {
-    action: "insert",
-    delta: {
-      lines: ["p"],
-      start: { row: 5, column: 1 },
-      end: { row: 5, column: 1 },
-    },
-  },
-  {
-    action: "insert",
-    delta: {
-      lines: ["r"],
-      start: { row: 5, column: 2 },
-      end: { row: 5, column: 2 },
-    },
-  },
-  {
-    action: "insert",
-    delta: {
-      lines: ["i"],
-      start: { row: 5, column: 3 },
-      end: { row: 5, column: 3 },
-    },
-  },
-  {
-    action: "insert",
-    delta: {
-      lines: ["n"],
-      start: { row: 5, column: 4 },
-      end: { row: 5, column: 4 },
-    },
-  },
-  {
-    action: "insert",
-    delta: {
-      lines: ["t"],
-      start: { row: 5, column: 5 },
-      end: { row: 5, column: 5 },
-    },
-  },
-  {
-    action: "insert",
-    delta: {
-      lines: ["("],
-      start: { row: 5, column: 6 },
-      end: { row: 5, column: 6 },
-    },
-  },
-  {
-    action: "insert",
-    delta: {
-      lines: ["b"],
-      start: { row: 5, column: 7 },
-      end: { row: 5, column: 7 },
-    },
-  },
-  {
-    action: "insert",
-    delta: {
-      lines: [")"],
-      start: { row: 5, column: 8 },
-      end: { row: 5, column: 8 },
-    },
-  },
-  {
-    action: "insert",
-    delta: {
-      lines: ["\n"],
-      start: { row: 5, column: 9 },
-      end: { row: 5, column: 9 },
-    },
-  },
-];
+let allEvents: AssessEvent[] = [];
 
 const handleMonacoContentChange = (event: any) => {
   let action = null;
@@ -536,49 +95,49 @@ a.onDidChangeModelContent((event: any) => {
   allEvents.push(data);
 });
 
-// Code to Playback Events
+// // Code to Playback Events
 
-const setCursorPosition = (lineNumber: number, column: number) =>
-  a.setPosition({
-    lineNumber,
-    column,
-  });
+// const setCursorPosition = (lineNumber: number, column: number) =>
+//   a.setPosition({
+//     lineNumber,
+//     column,
+//   });
 
-const playbackEvent = (i: number) => {
-  const { action, delta } = allEvents[i];
-  const { start, end, lines } = delta;
+// const playbackEvent = (i: number) => {
+//   const { action, delta } = allEvents[i];
+//   const { start, end, lines } = delta;
 
-  i === 0 && setCursorPosition(start.row, start.column);
+//   i === 0 && setCursorPosition(start.row, start.column);
 
-  if (action === "insert" && lines.join("") === "\n") {
-    a.trigger(null, "type", { text: "\n" });
-  } else if (action === "remove") {
-    let lineContent = editorModel.getLineContent(start.row);
-    console.log(`Content at line ${end.row}: ${lineContent}`);
-    lineContent = lineContent.substring(0, lineContent.length - 1);
-    console.log(`New Content at line ${end.row}:  ${lineContent}`);
-    a.executeEdits("my-source", [
-      {
-        range: new monaco.Range(
-          start.row,
-          1,
-          start.row,
-          lineContent.length + 1
-        ),
-        text: lineContent,
-      },
-    ]);
-  } else {
-    setCursorPosition(start.row, start.column);
-    a.trigger("keyboard", "type", {
-      text: lines.join(""),
-    });
-  }
-};
+//   if (action === "insert" && lines.join("") === "\n") {
+//     a.trigger(null, "type", { text: "\n" });
+//   } else if (action === "remove") {
+//     let lineContent = editorModel.getLineContent(start.row);
+//     console.log(`Content at line ${end.row}: ${lineContent}`);
+//     lineContent = lineContent.substring(0, lineContent.length - 1);
+//     console.log(`New Content at line ${end.row}:  ${lineContent}`);
+//     a.executeEdits("my-source", [
+//       {
+//         range: new monaco.Range(
+//           start.row,
+//           1,
+//           start.row,
+//           lineContent.length + 1
+//         ),
+//         text: lineContent,
+//       },
+//     ]);
+//   } else {
+//     setCursorPosition(start.row, start.column);
+//     a.trigger("keyboard", "type", {
+//       text: lines.join(""),
+//     });
+//   }
+// };
 
-for (var i = 0; i < allEvents.length; i++) {
-  playbackEvent(i);
-}
+// for (var i = 0; i < allEvents.length; i++) {
+//   playbackEvent(i);
+// }
 
 // install Monaco language client services
 MonacoServices.install(monaco);
@@ -605,9 +164,10 @@ function createLanguageClient(
 ): MonacoLanguageClient {
   return new MonacoLanguageClient({
     name: "Sample Language Client",
+
     clientOptions: {
       // use a language id as a document selector
-      documentSelector: ["python"],
+      documentSelector: [LANGUAGE_ID],
       // disable the default error handler
       errorHandler: {
         error: () => ErrorAction.Continue,

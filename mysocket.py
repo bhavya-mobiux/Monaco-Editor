@@ -4,7 +4,7 @@ import os
 import json
 
 
-f = open("example.go")
+f = open("example.py")
 file_contents = f.read()
 
 print(file_contents)
@@ -27,11 +27,11 @@ while answer == "y":
         data = {"jsonrpc": "2.0", "method": "initialize", "params": {"capabilities": {"textDocument": {"completion": {"completionItem": {"documentationFormat": ["plaintext"]}}}, "workspace": {
         }}, "processId": os.getpid(), "rootUri": "file:///Users/bhavyababuta/Desktop/jedi", "trace": "off"}, "id": 0}
     elif count == 3:
-        data = {"jsonrpc": "2.0", "method": "textDocument/didOpen", "params": {"textDocument": {"languageId": "go","uri":"file:///Users/bhavyababuta/Desktop/jedi/example.go",
+        data = {"jsonrpc": "2.0", "method": "textDocument/didOpen", "params": {"textDocument": {"languageId": "python","uri":"file:///Users/bhavyababuta/Desktop/jedi/example.py",
                                                                                                 "text": file_contents, "version": 2}}}
     elif count == 2:
         data = {"jsonrpc": "2.0", "method": "textDocument/completion", "params": {"position": {"character": 4,
-                                                                                               "line": 2}, "textDocument": {"uri": "file:///Users/bhavyababuta/Desktop/jedi/example.go"}}, "id": 43}
+                                                                                               "line": 2}, "textDocument": {"uri": "file:///Users/bhavyababuta/Desktop/jedi/example.py"}}, "id": 43}
 
     request_data = conn.send_json(data)
     count += 1

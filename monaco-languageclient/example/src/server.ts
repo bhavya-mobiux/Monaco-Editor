@@ -57,6 +57,7 @@ server.on(
           console.log(
             `Web socket is already started, number of connection after adding: ${numberOfConnections}`
           );
+
           numberOfConnections++;
           launch(socket);
         } else {

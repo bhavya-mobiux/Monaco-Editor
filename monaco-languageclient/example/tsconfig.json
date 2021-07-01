@@ -1,12 +1,10 @@
 {
-    "extends": "../client/tsconfig",
-    "compilerOptions": {
-        "rootDir": "src",
-        "outDir": "lib",
-        "baseUrl": ".",
-        "skipLibCheck": true
-    },
-    "include": [
-        "src"
-    ]
+  "extends": "../client/tsconfig",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "lib",
+    "baseUrl": ".",
+    "skipLibCheck": true
+  },
+  "include": ["src"]
 }

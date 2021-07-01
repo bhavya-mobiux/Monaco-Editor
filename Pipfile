@@ -6,7 +6,7 @@ name = "pypi"
 [packages]
 jedi = "*"
 lsp = "*"
-python-language-server = {extras = ["all"], version = "*"}
+python-lsp-server = {extras = ["all"], version = "*"}
 
 [dev-packages]
 

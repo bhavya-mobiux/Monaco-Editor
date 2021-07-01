@@ -11,7 +11,7 @@ import * as fs from "fs";
 import config from "./config";
 
 var count = 0;
-const languageDetails = config.cpp;
+const languageDetails = config.python;
 
 export function launch(socket: rpc.IWebSocket) {
   const reader = new rpc.WebSocketMessageReader(socket);

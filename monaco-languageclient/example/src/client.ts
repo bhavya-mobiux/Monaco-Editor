@@ -12,7 +12,7 @@ import normalizeUrl = require("normalize-url");
 const ReconnectingWebSocket = require("reconnecting-websocket");
 import CONFIG from "./config";
 
-const languageDetails = CONFIG.cpp;
+const languageDetails = CONFIG.python;
 
 // register Monaco languages
 const LANGUAGE_ID = languageDetails.languageId;

@@ -1,4 +1,4 @@
-export default {
+const languages: { [key: string]: any } = {
   python: {
     languageId: "python",
     extensions: [".python"],
@@ -7,7 +7,7 @@ export default {
     startLSCommand: "pylsp",
     options: ["-v"],
     logFile:
-      "/Users/bhavyababuta/Desktop/jedi/monaco-languageclient/example/log/log-python.txt",
+      "/home/yamini/hirepro/Monaco-Editor/monaco-languageclient/example/log/log-python.txt",
   },
   java: {
     languageId: "java",
@@ -18,13 +18,13 @@ export default {
       "/Users/bhavyababuta/Downloads/java-language-server-master/dist/lang_server_mac.sh",
     options: [],
     workspace: {
-      uri: "file:///Users/bhavyababuta/Desktop/jedi/monaco-languageclient/example/src",
+      uri: "file:///home/yamini/hirepro/jedi/monaco-languageclient/example/src",
       name: "test",
     },
     rootUri:
-      "file:///Users/bhavyababuta/Desktop/jedi/monaco-languageclient/example/src/",
+      "file:///home/yamini/hirepro/jedi/monaco-languageclient/example/src/",
     logFile:
-      "/Users/bhavyababuta/Desktop/jedi/monaco-languageclient/example/log/log-java.txt",
+      "/home/yamini/hirepro/Monaco-Editor/monaco-languageclient/example/log/log-java.txt",
   },
   c: {
     languageId: "c",
@@ -34,13 +34,13 @@ export default {
     startLSCommand: "ccls",
     options: [],
     workspace: {
-      uri: "file:///Users/bhavyababuta/Desktop/jedi/monaco-languageclient/example/src",
+      uri: "file:///home/yamini/hirepro/jedi/monaco-languageclient/example/src",
       name: "test",
     },
     rootUri:
-      "file:///Users/bhavyababuta/Desktop/jedi/monaco-languageclient/example/src/",
+      "file:///home/yamini/hirepro/jedi/monaco-languageclient/example/src/",
     logFile:
-      "/Users/bhavyababuta/Desktop/jedi/monaco-languageclient/example/log/log-c.txt",
+      "/home/yamini/hirepro/Monaco-Editor/monaco-languageclient/example/log/log-c.txt",
   },
   cpp: {
     languageId: "cpp",
@@ -50,12 +50,14 @@ export default {
     startLSCommand: "ccls",
     options: [],
     workspace: {
-      uri: "file:///Users/bhavyababuta/Desktop/jedi/monaco-languageclient/example/src",
+      uri: "file:///home/yamini/hirepro/jedi/monaco-languageclient/example/src",
       name: "test",
     },
     rootUri:
-      "file:///Users/bhavyababuta/Desktop/jedi/monaco-languageclient/example/src/",
+      "file:///home/yamini/hirepro/jedi/monaco-languageclient/example/src/",
     logFile:
-      "/Users/bhavyababuta/Desktop/jedi/monaco-languageclient/example/log/log-cpp.txt",
+      "/home/yamini/hirepro/Monaco-Editor/monaco-languageclient/example/log/log-cpp.txt",
   },
 };
+
+export default languages;

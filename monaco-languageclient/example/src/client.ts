@@ -12,13 +12,23 @@ import normalizeUrl = require("normalize-url");
 const ReconnectingWebSocket = require("reconnecting-websocket");
 import CONFIG from "./config";
 
-const languageDetails = CONFIG.python;
+//declare gobal 
+declare global {
+  interface Window {
+    __monaco: any;
+    __monacoInstanceCreated: any;
+    __selectedLanguage:string;
+  }
+}
+window.__selectedLanguage = 'python';
+
+let languageDetails = CONFIG[window.__selectedLanguage];
 
 // register Monaco languages
-const LANGUAGE_ID = languageDetails.languageId;
-const EXTENSIONS = languageDetails.extensions;
-const MIMETYPES = languageDetails.mimetypes;
-const FILE_NAME = languageDetails.file;
+let LANGUAGE_ID = languageDetails.languageId;
+let EXTENSIONS = languageDetails.extensions;
+let MIMETYPES = languageDetails.mimetypes;
+let FILE_NAME = languageDetails.file;
 
 monaco.languages.register({
   id: LANGUAGE_ID,
@@ -27,13 +37,16 @@ monaco.languages.register({
 });
 
 // create Monaco editor
-const value = `public static void main(){}`;
+const value = `const a = 10`;
 
 const editorModel: monaco.editor.ITextModel = monaco.editor.createModel(
   value,
   LANGUAGE_ID, //java||python||c||cpp||go||js
   monaco.Uri.parse(FILE_NAME) // file for monaco editor
 );
+
+//assigning __monacoInstanceCreated key in window
+window.__monaco = window.__monaco || monaco || null;
 
 const a = monaco.editor.create(document.getElementById("container")!, {
   model: editorModel,
@@ -42,6 +55,8 @@ const a = monaco.editor.create(document.getElementById("container")!, {
     enabled: true,
   },
 });
+//assigning __monacoInstanceCreated key in window
+window.__monacoInstanceCreated = window.__monacoInstanceCreated || a || null;
 
 interface AssessEvent {
   action: string | null;
@@ -187,8 +202,14 @@ function createLanguageClient(
 
 function createUrl(path: string): string {
   const protocol = location.protocol === "https:" ? "wss" : "ws";
+  // return normalizeUrl(
+  //   `${protocol}://${location.host}${location.pathname}${path}`
+  // );
+
+  //for local ngnix
+  const port = 8000;
   return normalizeUrl(
-    `${protocol}://${location.host}${location.pathname}${path}`
+    `${protocol}://${location.host}:${port}${path}`
   );
 }
 

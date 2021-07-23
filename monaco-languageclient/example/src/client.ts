@@ -100,8 +100,8 @@ const listenToWebSocketOpening = () => {
   });
 };
 
+// Running the default python language server
 const url = createUrl(`/sampleServer?language=python`);
-console.log("Connecting to websocket: ", url);
 webSocket = createWebSocket(url);
 listenToWebSocketOpening();
 
@@ -161,7 +161,6 @@ function createUrl(path: string): string {
   return normalizeUrl(
     `${protocol}://${location.host}${location.pathname}${path}`
   );
-
   //for local ngnix
   // const port = 8000;
   // return normalizeUrl(`${protocol}://${location.host}:${port}${path}`);

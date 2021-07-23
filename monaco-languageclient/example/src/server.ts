@@ -34,7 +34,10 @@ let numberOfConnections = 0;
 server.on(
   "upgrade",
   (request: http.IncomingMessage, socket: net.Socket, head: Buffer) => {
+    const urlParse:any = request.url ? url.parse(request.url) : undefined;
     const pathname = request.url ? url.parse(request.url).pathname : undefined;
+    console.log(`------------------------------------------- ${urlParse}`);
+    console.log('++++++++++++++++++++++++++++++++++++++++++++', urlParse.query);
     if (pathname === "/sampleServer") {
       wss.handleUpgrade(request, socket, head, (webSocket) => {
         const socket: rpc.IWebSocket = {

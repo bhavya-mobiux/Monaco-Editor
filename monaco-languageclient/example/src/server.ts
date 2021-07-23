@@ -26,7 +26,7 @@ const wss = new ws.Server({
 });
 
 let numberOfConnections = 0;
-let languageId: string = "python";
+let languageId: string;
 
 server.on(
   "upgrade",
@@ -35,14 +35,16 @@ server.on(
     const pathname = request.url ? url.parse(request.url).pathname : undefined;
     console.log(`------------------------------------------- ${query}`);
     if (query) {
-      languageId = query.split("=")[1];
+      if (query.split("=")[1] !== languageId) {
+        languageId = query.split("=")[1];
+      }
     }
 
     if (pathname === "/sampleServer") {
       wss.handleUpgrade(request, socket, head, (webSocket) => {
         const socket: rpc.IWebSocket = {
           send: (content) => {
-            console.log("Content here: ", content);
+            // console.log("Response from language server: ", content);
             webSocket.send(content, (error) => {
               if (error) {
                 console.log("Error here: ", error);

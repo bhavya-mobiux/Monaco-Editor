@@ -121,7 +121,7 @@ const OnLoadEditor = function (selectedLanguage: string) {
 window.__loadEditor = window.__loadEditor || OnLoadEditor || null;
 
 //call for loading editor
-window.__loadEditor("python");
+//window.__loadEditor("python");
 
 // install Monaco language client services
 MonacoServices.install(monaco);
@@ -155,13 +155,13 @@ function createLanguageClient(
 
 function createUrl(path: string): string {
   const protocol = location.protocol === "https:" ? "wss" : "ws";
-  return normalizeUrl(
-    `${protocol}://${location.host}${location.pathname}${path}`
-  );
+  // return normalizeUrl(
+  //   `${protocol}://${location.host}${location.pathname}${path}`
+  // );
 
   //for local ngnix
-  // const port = 8000;
-  // return normalizeUrl(`${protocol}://${location.host}:${port}${path}`);
+  const port = 8000;
+  return normalizeUrl(`${protocol}://${location.host}:${port}${path}`);
 }
 
 function createWebSocket(url: string): WebSocket {

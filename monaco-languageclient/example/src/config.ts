@@ -3,7 +3,7 @@ export default {
     languageId: "python",
     extensions: [".python"],
     mimetypes: ["application/x-python-code"],
-    file: "inmemory:///model.py",
+    file: "file:///Users/bhavyababuta/Desktop/jedi/monaco-languageclient/example/src/example.py",
     startLSCommand: "pylsp",
     options: ["-v"],
     logFile:

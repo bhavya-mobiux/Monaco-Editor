@@ -8,10 +8,10 @@ import * as rpc from "@codingame/monaco-jsonrpc";
 import * as server from "@codingame/monaco-jsonrpc/lib/server";
 import * as lsp from "vscode-languageserver";
 import * as fs from "fs";
-import config from "./config";
+import CONFIG from "./config";
 
 var count = 0;
-const languageDetails = config.python;
+const languageDetails = CONFIG.c;
 
 export function launch(socket: rpc.IWebSocket) {
   const reader = new rpc.WebSocketMessageReader(socket);
@@ -47,12 +47,12 @@ export function launch(socket: rpc.IWebSocket) {
         let initializeParams = message.params as lsp.InitializeParams;
 
         if (
-          languageDetails.languageId === config.java.languageId ||
-          languageDetails.languageId === config.c.languageId ||
-          languageDetails.languageId === config.cpp.languageId
+          languageDetails.languageId === CONFIG.java.languageId ||
+          languageDetails.languageId === CONFIG.c.languageId ||
+          languageDetails.languageId === CONFIG.cpp.languageId
         ) {
-          initializeParams.workspaceFolders = [config.java.workspace];
-          initializeParams.rootUri = config.java.rootUri;
+          initializeParams.workspaceFolders = [CONFIG.java.workspace];
+          initializeParams.rootUri = CONFIG.java.rootUri;
         }
         initializeParams.processId = process.pid;
       }

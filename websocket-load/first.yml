@@ -1,0 +1,25 @@
+config:
+  target: "ws://localhost:3000/sampleServer"
+  processor: "./load-data.js"
+  phases:
+    - duration: 1
+      arrivalRate: 1
+      name: "Starting 10 Clients"
+
+  ensure:
+    maxErrorRate: 1
+
+scenarios:
+  - engine: "ws"
+    flow:
+      - loop:
+          - function: "generatePayload"
+          - send: "{{payload}}"
+          - function: "generatePayload"
+          - send: "{{payload}}"
+          - function: "generatePayload"
+          - send: "{{payload}}"
+          - function: "generatePayload"
+          - send: "{{payload}}"
+          - think: 1
+        count: 133

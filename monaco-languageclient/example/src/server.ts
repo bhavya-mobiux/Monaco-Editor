@@ -34,6 +34,7 @@ let numberOfConnections = 0;
 server.on(
   "upgrade",
   (request: http.IncomingMessage, socket: net.Socket, head: Buffer) => {
+    const query = request.url ? url.parse(request.url).pathname : undefined;
     const pathname = request.url ? url.parse(request.url).pathname : undefined;
     if (pathname === "/sampleServer") {
       wss.handleUpgrade(request, socket, head, (webSocket) => {
@@ -42,7 +43,6 @@ server.on(
             console.log("Content here: ", content);
             webSocket.send(content, (error) => {
               if (error) {
-                console.log("Error here: ", error);
                 throw error;
               }
             });

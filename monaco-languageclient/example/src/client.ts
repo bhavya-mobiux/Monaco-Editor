@@ -12,7 +12,14 @@ import normalizeUrl = require("normalize-url");
 const ReconnectingWebSocket = require("reconnecting-websocket");
 import CONFIG from "./config";
 
-const languageDetails = CONFIG.python;
+const languageDetails = CONFIG.c;
+declare global {
+  interface Window {
+    monaco: any;
+  }
+}
+
+window.monaco = window.monaco || null;
 
 // register Monaco languages
 const LANGUAGE_ID = languageDetails.languageId;
@@ -42,6 +49,8 @@ const a = monaco.editor.create(document.getElementById("container")!, {
     enabled: true,
   },
 });
+
+window.monaco = monaco;
 
 interface AssessEvent {
   action: string | null;
@@ -143,7 +152,7 @@ a.onDidChangeModelContent((event: any) => {
 MonacoServices.install(monaco);
 
 // create the web socket
-const url = createUrl("/sampleServer");
+const url = createUrl("/sampleServer?language=python");
 
 console.log("URL here: ", url);
 const webSocket = createWebSocket(url);
@@ -168,6 +177,7 @@ function createLanguageClient(
     clientOptions: {
       // use a language id as a document selector
       documentSelector: [LANGUAGE_ID],
+
       // disable the default error handler
       errorHandler: {
         error: () => ErrorAction.Continue,

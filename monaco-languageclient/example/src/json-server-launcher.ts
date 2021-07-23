@@ -24,7 +24,7 @@ export function launch(socket: rpc.IWebSocket, languageId: string) {
   );
 
   server.forward(socketConnection, serverConnection, (message) => {
-    console.log("Message from client here: ", message);
+    // console.log("Message from client here: ", message);
     if (rpc.isRequestMessage(message)) {
       if (ENABLE_LOGGING) {
         if (count === 0) {

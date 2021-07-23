@@ -28,7 +28,7 @@ let LANGUAGE_ID: string;
 //assigning __monaco key in window
 window.__monaco = window.__monaco || monaco || null;
 
-let webSocket: WebSocket | null = null;
+let webSocket: WebSocket;
 
 const createEditorInstanse = (selectedLanguage: string) =>
   new Promise<string>((resolve, reject) => {
@@ -42,6 +42,7 @@ const createEditorInstanse = (selectedLanguage: string) =>
       : (window.__selectedLanguage = selectedLanguage);
 
     let languageDetails = CONFIG[selectedLanguage];
+    console.log("Language details here: ", languageDetails);
 
     // register Monaco languages
     const { extensions, mimetypes, languageId, snippet, file } =
@@ -84,33 +85,35 @@ const createEditorInstanse = (selectedLanguage: string) =>
     resolve("Instance created");
   });
 
+createEditorInstanse("python").then(() => {});
+
+// listen when the web socket is opened
+const listenToWebSocketOpening = () => {
+  listen({
+    webSocket,
+    onConnection: (connection) => {
+      // create and start the language client
+      const languageClient = createLanguageClient(connection, LANGUAGE_ID);
+      const disposable = languageClient.start();
+      connection.onClose(() => disposable.dispose());
+    },
+  });
+};
+
+const url = createUrl(`/sampleServer?language=python`);
+console.log("Connecting to websocket: ", url);
+webSocket = createWebSocket(url);
+listenToWebSocketOpening();
+
 const OnLoadEditor = function (selectedLanguage: string) {
   createEditorInstanse(selectedLanguage)
     .then(() => {
-      // // onchange handler of Editor
-      // monacoInstance.onDidChangeModelContent((event: any) => {
-      //   const data = handleMonacoContentChange(event);
-      //   allEvents.push(data);
-      // });
-
       // If the websocket is present and open close the socket connection
-      webSocket?.OPEN && webSocket.close();
 
       const url = createUrl(`/sampleServer?language=${selectedLanguage}`);
       console.log("Connecting to websocket: ", url);
-
       webSocket = createWebSocket(url);
-
-      // listen when the web socket is opened
-      listen({
-        webSocket,
-        onConnection: (connection) => {
-          // create and start the language client
-          const languageClient = createLanguageClient(connection, LANGUAGE_ID);
-          const disposable = languageClient.start();
-          connection.onClose(() => disposable.dispose());
-        },
-      });
+      listenToWebSocketOpening();
     })
     .catch((error) => {
       console.log(error);
@@ -121,7 +124,7 @@ const OnLoadEditor = function (selectedLanguage: string) {
 window.__loadEditor = window.__loadEditor || OnLoadEditor || null;
 
 //call for loading editor
-window.__loadEditor("python");
+// window.__loadEditor("python");
 
 // install Monaco language client services
 MonacoServices.install(monaco);

@@ -42,22 +42,22 @@ const createEditorInstanse = (selectedLanguage: string) =>
       : (window.__selectedLanguage = selectedLanguage);
 
     let languageDetails = CONFIG[selectedLanguage];
-    console.log("Language details here: ", languageDetails);
 
     // register Monaco languages
-    LANGUAGE_ID = languageDetails.languageId;
-    let FILE_NAME = languageDetails.file;
+    const { extensions, mimetypes, languageId, snippet, file } =
+      languageDetails;
+    LANGUAGE_ID = languageId;
+    let FILE_NAME = file;
 
     monaco.languages.register({
       id: LANGUAGE_ID,
-      extensions: languageDetails.extensions,
-      mimetypes: languageDetails.mimetypes,
+      extensions,
+      mimetypes,
     });
 
     // create Monaco editor
-    const value = languageDetails.snippet;
     const editorModel: monaco.editor.ITextModel = monaco.editor.createModel(
-      value,
+      snippet,
       LANGUAGE_ID, //java||python||c||cpp||go||js
       monaco.Uri.parse(FILE_NAME) // file for monaco editor
     );

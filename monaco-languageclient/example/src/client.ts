@@ -12,13 +12,13 @@ import normalizeUrl = require("normalize-url");
 const ReconnectingWebSocket = require("reconnecting-websocket");
 import CONFIG from "./config";
 
-//declare gobal 
+//declare gobal
 declare global {
   interface Window {
     __monaco: any;
     __monacoInstanceCreated: any;
     __selectedLanguage?: string;
-    __loadEditor: any
+    __loadEditor: any;
   }
 }
 
@@ -28,57 +28,62 @@ let LANGUAGE_ID: string;
 //assigning __monaco key in window
 window.__monaco = window.__monaco || monaco || null;
 
-const createEditorInstanse = function (selectedLanguage: string) {
-  console.log(`selectedLanguage ${selectedLanguage}`);
-  return new Promise<string>((resolve, reject) => {
+let webSocket: WebSocket | null = null;
+
+const createEditorInstanse = (selectedLanguage: string) =>
+  new Promise<string>((resolve, reject) => {
+    console.log(`selectedLanguage ${selectedLanguage}`);
     if (!selectedLanguage) {
-      return reject('please provide language');
-    }
-    if (window.__selectedLanguage === selectedLanguage) {
-      return;
+      reject("Please providde language");
     }
 
-    window.__selectedLanguage = selectedLanguage;
+    window.__selectedLanguage === selectedLanguage
+      ? reject("Language Id already selected")
+      : (window.__selectedLanguage = selectedLanguage);
 
     let languageDetails = CONFIG[selectedLanguage];
+    console.log("Language details here: ", languageDetails);
 
     // register Monaco languages
     LANGUAGE_ID = languageDetails.languageId;
-    let EXTENSIONS = languageDetails.extensions;
-    let MIMETYPES = languageDetails.mimetypes;
     let FILE_NAME = languageDetails.file;
 
     monaco.languages.register({
       id: LANGUAGE_ID,
-      extensions: EXTENSIONS,
-      mimetypes: MIMETYPES,
+      extensions: languageDetails.extensions,
+      mimetypes: languageDetails.mimetypes,
     });
 
     // create Monaco editor
     const value = languageDetails.snippet;
+    const editorModel: monaco.editor.ITextModel = monaco.editor.createModel(
+      value,
+      LANGUAGE_ID, //java||python||c||cpp||go||js
+      monaco.Uri.parse(FILE_NAME) // file for monaco editor
+    );
+
+    // If the monacoInstance is not present create a new monaco instance else set the new model with new language details
     if (!monacoInstance) {
-      const editorModel: monaco.editor.ITextModel = monaco.editor.createModel(
-        value,
-        LANGUAGE_ID, //java||python||c||cpp||go||js
-        monaco.Uri.parse(FILE_NAME) // file for monaco editor
+      monacoInstance = monaco.editor.create(
+        document.getElementById("container")!,
+        {
+          model: editorModel,
+          glyphMargin: true,
+          lightbulb: {
+            enabled: true,
+          },
+        }
       );
-      monacoInstance = monaco.editor.create(document.getElementById("container")!, {
-        model: editorModel,
-        glyphMargin: true,
-        lightbulb: {
-          enabled: true,
-        },
-      });
     } else {
-      monaco.editor.setModelLanguage(monacoInstance.getModel(), LANGUAGE_ID);
-      monacoInstance.getModel().setValue(value);
+      monacoInstance.setModel(editorModel);
     }
 
     //assigning __monacoInstanceCreated key in window
-    window.__monacoInstanceCreated = window.__monacoInstanceCreated || monacoInstance || null;
-    resolve();
+    window.__monacoInstanceCreated =
+      window.__monacoInstanceCreated || monacoInstance || null;
+    resolve("Instance created");
   });
-}
+
 const OnLoadEditor = function (selectedLanguage: string) {
   createEditorInstanse(selectedLanguage)
     .then(() => {
@@ -88,13 +93,13 @@ const OnLoadEditor = function (selectedLanguage: string) {
       //   allEvents.push(data);
       // });
 
-      // create the web socket
-      //const url = createUrl("/sampleServer");
-      const url = createUrl("/sampleServer?language=python");
-      console.log("URL here: ", url);
-      const webSocket = createWebSocket(url);
+      // If the websocket is present and open close the socket connection
+      webSocket?.OPEN && webSocket.close();
 
-      //webSocket.close();// need add depending on talk with charuk sir
+      const url = createUrl(`/sampleServer?language=${selectedLanguage}`);
+      console.log("Connecting to websocket: ", url);
+
+      webSocket = createWebSocket(url);
 
       // listen when the web socket is opened
       listen({
@@ -110,18 +115,16 @@ const OnLoadEditor = function (selectedLanguage: string) {
     .catch((error) => {
       console.log(error);
     });
-}
+};
 
 //assigning __monacoInstanceCreated key in window
 window.__loadEditor = window.__loadEditor || OnLoadEditor || null;
 
 //call for loading editor
-window.__loadEditor('python');
+window.__loadEditor("python");
 
 // install Monaco language client services
 MonacoServices.install(monaco);
-
-
 
 function createLanguageClient(
   connection: MessageConnection,
@@ -152,15 +155,13 @@ function createLanguageClient(
 
 function createUrl(path: string): string {
   const protocol = location.protocol === "https:" ? "wss" : "ws";
-  // return normalizeUrl(
-  //   `${protocol}://${location.host}${location.pathname}${path}`
-  // );
+  return normalizeUrl(
+    `${protocol}://${location.host}${location.pathname}${path}`
+  );
 
   //for local ngnix
-  const port = 8000;
-  return normalizeUrl(
-    `${protocol}://${location.host}:${port}${path}`
-  );
+  // const port = 8000;
+  // return normalizeUrl(`${protocol}://${location.host}:${port}${path}`);
 }
 
 function createWebSocket(url: string): WebSocket {

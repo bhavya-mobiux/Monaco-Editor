@@ -6,9 +6,8 @@ const languages: { [key: string]: any } = {
     file: "inmemory:///model.py",
     startLSCommand: "pylsp",
     options: ["-v"],
-    logFile:
-      "/home/yamini/hirepro/Monaco-Editor/monaco-languageclient/example/log/log-python.txt",
-    snippet: `const a = 10`
+    logFile: "../log/log-python.txt",
+    snippet: `const a = 10`,
   },
   java: {
     languageId: "java",
@@ -24,13 +23,12 @@ const languages: { [key: string]: any } = {
     },
     rootUri:
       "file:///home/yamini/hirepro/jedi/monaco-languageclient/example/src/",
-    logFile:
-      "/home/yamini/hirepro/Monaco-Editor/monaco-languageclient/example/log/log-java.txt",
+    logFile: "../log/log-java.txt",
     snippet: `class HelloWorld {
         public static void main(String[] args) {
             System.out.println("Hello, World!"); 
         }
-    }`
+    }`,
   },
   c: {
     languageId: "c",
@@ -45,14 +43,13 @@ const languages: { [key: string]: any } = {
     },
     rootUri:
       "file:///home/yamini/hirepro/jedi/monaco-languageclient/example/src/",
-    logFile:
-      "/home/yamini/hirepro/Monaco-Editor/monaco-languageclient/example/log/log-c.txt",
+    logFile: "../log/log-c.txt",
     snippet: `#include <stdio.h>
     int main() {
        // printf() displays the string inside quotation
        printf("Hello, World!");
        return 0;
-    }`
+    }`,
   },
   cpp: {
     languageId: "cpp",
@@ -67,14 +64,13 @@ const languages: { [key: string]: any } = {
     },
     rootUri:
       "file:///home/yamini/hirepro/jedi/monaco-languageclient/example/src/",
-    logFile:
-      "/home/yamini/hirepro/Monaco-Editor/monaco-languageclient/example/log/log-cpp.txt",
+    logFile: "../log/log-cpp.txt",
     snippet: `#include <iostream>
 
     int main() {
         std::cout << "Hello World!";
         return 0;
-    }`
+    }`,
   },
 };
 

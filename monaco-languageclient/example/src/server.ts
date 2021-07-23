@@ -1,7 +1,3 @@
-/* --------------------------------------------------------------------------------------------
- * Copyright (c) 2018 TypeFox GmbH (http://www.typefox.io). All rights reserved.
- * Licensed under the MIT License. See License.txt in the project root for license information.
- * ------------------------------------------------------------------------------------------ */
 import * as ws from "ws";
 import * as http from "http";
 import * as url from "url";
@@ -30,14 +26,18 @@ const wss = new ws.Server({
 });
 
 let numberOfConnections = 0;
+let languageId: string = "python";
 
 server.on(
   "upgrade",
   (request: http.IncomingMessage, socket: net.Socket, head: Buffer) => {
-    const urlParse:any = request.url ? url.parse(request.url) : undefined;
+    const query: any = request.url ? url.parse(request.url).query : undefined;
     const pathname = request.url ? url.parse(request.url).pathname : undefined;
-    console.log(`------------------------------------------- ${urlParse}`);
-    console.log('++++++++++++++++++++++++++++++++++++++++++++', urlParse.query);
+    console.log(`------------------------------------------- ${query}`);
+    if (query) {
+      languageId = query.split("=")[1];
+    }
+
     if (pathname === "/sampleServer") {
       wss.handleUpgrade(request, socket, head, (webSocket) => {
         const socket: rpc.IWebSocket = {
@@ -55,16 +55,15 @@ server.on(
           onClose: (cb) => webSocket.on("close", cb),
           dispose: () => webSocket.close(),
         };
+
         // launch the server when the web socket is opened
         if (webSocket.readyState === webSocket.OPEN) {
           console.log(
-            `Web socket is already started, number of connection after adding: ${numberOfConnections}`
+            `Web socket is already started, number of connection after adding: ${++numberOfConnections}`
           );
-
-          numberOfConnections++;
-          launch(socket);
+          launch(socket, languageId);
         } else {
-          webSocket.on("open", () => launch(socket));
+          webSocket.on("open", () => launch(socket, languageId));
         }
       });
     }

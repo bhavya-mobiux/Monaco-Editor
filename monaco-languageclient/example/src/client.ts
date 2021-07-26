@@ -102,7 +102,7 @@ const createEditorInstanse = (selectedLanguage: string) =>
       monacoInstance.setModel(editorModel);// model is not updating properly need to test,
       //with adding below code works okay
       //monaco.editor.setModelLanguage(monacoInstance.getModel(), LANGUAGE_ID);// without this line auto suggestion doesnot work, gets diff error with this need to look
-      monacoInstance.getModel().setValue(snippet);
+      //monacoInstance.getModel().setValue(snippet);
     }
     resolve("Instance created");
   });

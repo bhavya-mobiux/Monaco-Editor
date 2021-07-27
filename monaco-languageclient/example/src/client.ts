@@ -27,7 +27,7 @@ window.__monaco = window.__monaco || monaco || null;
 
 let monacoInstance: any;
 let LANGUAGE_ID: string;
-let editor: monaco.editor.ITextModel;
+let monacoModel: monaco.editor.ITextModel;
 
 let webSocket: WebSocket;
 
@@ -58,11 +58,14 @@ const createEditorInstanse = (selectedLanguage: string) =>
 
     LANGUAGE_ID = languageId;
     let FILE_NAME = file;
-    // If the monaco editor is already present dispose of the editor first before creating a new one
-    editor && editor.dispose();
 
-    // create Monaco editor
-    editor = monaco.editor.createModel(
+    // If the monaco editor is already present dispose of the editor first before creating a new one
+    monacoModel && monacoModel.dispose();
+
+    // monaco.getMo
+
+    // create Monaco monacoModel
+    monacoModel = monaco.editor.createModel(
       snippet,
       LANGUAGE_ID, //java||python||c||cpp||go||js
       monaco.Uri.parse(FILE_NAME) // file for monaco editor
@@ -73,7 +76,7 @@ const createEditorInstanse = (selectedLanguage: string) =>
       monacoInstance = monaco.editor.create(
         document.getElementById("container")!,
         {
-          model: editor,
+          model: monacoModel,
           glyphMargin: true,
           lightbulb: {
             enabled: true,
@@ -81,7 +84,7 @@ const createEditorInstanse = (selectedLanguage: string) =>
         }
       );
     } else {
-      monacoInstance.setModel(editor);
+      monacoInstance.setModel(monacoModel);
     }
 
     //assigning __monacoInstanceCreated key in window

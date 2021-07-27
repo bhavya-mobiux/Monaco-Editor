@@ -11,6 +11,7 @@ import {
 import normalizeUrl = require("normalize-url");
 const ReconnectingWebSocket = require("reconnecting-websocket");
 import CONFIG from "./config";
+import { TEST_CONFIG } from "./test-config";
 
 //declare gobal
 declare global {
@@ -83,6 +84,14 @@ const createEditorInstanse = (selectedLanguage: string) =>
           },
         }
       );
+      if (TEST_CONFIG.ENABLE_COPY_PASTE === false) {
+        monacoInstance.onKeyDown((event: any) => {
+          const { keyCode, ctrlKey, metaKey } = event;
+          if ((keyCode === 33 || keyCode === 52) && (metaKey || ctrlKey)) {
+            event.preventDefault();
+          }
+        });
+      }
     } else {
       monacoInstance.setModel(monacoModel);
     }

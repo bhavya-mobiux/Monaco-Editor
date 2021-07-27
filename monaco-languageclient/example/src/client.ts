@@ -27,7 +27,7 @@ declare global {
 window.__monaco = window.__monaco || monaco || null;
 
 let monacoInstance: any;
-let LANGUAGE_ID: string;
+let LANGUAGE_ID: string = "python";
 let monacoModel: monaco.editor.ITextModel;
 
 let webSocket: WebSocket;
@@ -84,6 +84,12 @@ const createEditorInstanse = (selectedLanguage: string) =>
           },
         }
       );
+
+      if (TEST_CONFIG.ENABLE_AUTOCOMPLETE === false) {
+        const disableAutoCompleteStyle = document.createElement("style");
+        disableAutoCompleteStyle.textContent = `.suggest-widget{display:none !important}`;
+        document.head.append(disableAutoCompleteStyle);
+      }
       if (TEST_CONFIG.ENABLE_COPY_PASTE === false) {
         monacoInstance.onKeyDown((event: any) => {
           const { keyCode, ctrlKey, metaKey } = event;
@@ -116,15 +122,19 @@ const listenToWebSocketOpening = () => {
 };
 
 // Running the default python language server
-const url = createUrl(`/sampleServer?language=python`);
+const url = createUrl(`/sampleServer`);
 webSocket = createWebSocket(url);
 listenToWebSocketOpening();
 
 function createUrl(path: string): string {
   const protocol = location.protocol === "https:" ? "wss" : "ws";
-  return normalizeUrl(
-    `${protocol}://${location.host}${location.pathname}${path}`
+  const socketUrl = normalizeUrl(
+    `${protocol}://${location.host}${location.pathname}${path}?language=${LANGUAGE_ID}&enableAutoComplete=${TEST_CONFIG.ENABLE_AUTOCOMPLETE}`
   );
+  console.log("URL here: ", socketUrl);
+
+  return socketUrl;
+
   //for local ngnix
   // const port = 8000;
   // return normalizeUrl(`${protocol}://${location.host}:${port}${path}`);
@@ -146,7 +156,7 @@ const OnLoadEditor = function (selectedLanguage: string) {
   createEditorInstanse(selectedLanguage)
     .then(() => {
       // If the websocket is present and open close the socket connection
-      const url = createUrl(`/sampleServer?language=${selectedLanguage}`);
+      const url = createUrl(`/sampleServer`);
       webSocket = createWebSocket(url);
       listenToWebSocketOpening();
     })

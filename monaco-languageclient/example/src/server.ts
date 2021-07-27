@@ -26,7 +26,8 @@ const wss = new ws.Server({
 });
 
 let numberOfConnections = 0;
-let languageId: string;
+let language: string;
+let enableAutoComplete: boolean = true;
 
 server.on(
   "upgrade",
@@ -35,8 +36,17 @@ server.on(
     const pathname = request.url ? url.parse(request.url).pathname : undefined;
     console.log(`------------------------------------------- ${query}`);
     if (query) {
-      if (query.split("=")[1] !== languageId) {
-        languageId = query.split("=")[1];
+      const queryStringParameters = new url.URLSearchParams(query);
+      if (String(queryStringParameters.get("language")).length > 0) {
+        language = String(queryStringParameters.get("language"));
+        console.log("Lanugage here: ", language);
+      }
+      if (
+        Boolean(queryStringParameters.get("enableAutoComplete")) === true ||
+        Boolean(queryStringParameters.get("enableAutoComplete")) === false
+      ) {
+        enableAutoComplete =
+          Boolean(queryStringParameters.get("enableAutoComplete")) === true;
       }
     }
 
@@ -63,9 +73,11 @@ server.on(
           console.log(
             `Web socket is already started, number of connection after adding: ${++numberOfConnections}`
           );
-          launch(socket, languageId);
+          launch(socket, language, enableAutoComplete);
         } else {
-          webSocket.on("open", () => launch(socket, languageId));
+          webSocket.on("open", () =>
+            launch(socket, language, enableAutoComplete)
+          );
         }
       });
     }

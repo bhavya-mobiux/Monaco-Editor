@@ -7,7 +7,11 @@ import config from "./config";
 var count = 0;
 const ENABLE_LOGGING: boolean = false;
 
-export function launch(socket: rpc.IWebSocket, languageId: string) {
+export function launch(
+  socket: rpc.IWebSocket,
+  languageId: string,
+  enableAutoComplete: boolean
+) {
   const languageDetails = config[languageId];
 
   const reader = new rpc.WebSocketMessageReader(socket);
@@ -24,7 +28,6 @@ export function launch(socket: rpc.IWebSocket, languageId: string) {
   );
 
   server.forward(socketConnection, serverConnection, (message) => {
-    // console.log("Message from client here: ", message);
     if (rpc.isRequestMessage(message)) {
       if (ENABLE_LOGGING) {
         if (count === 0) {
@@ -39,9 +42,16 @@ export function launch(socket: rpc.IWebSocket, languageId: string) {
         );
       }
 
+      if (
+        enableAutoComplete === false &&
+        message.method === lsp.CompletionRequest.method
+      ) {
+        console.log("Message here: ", message);
+        return { jsonrpc: message.jsonrpc, id: message.id };
+      }
+
       if (message.method === lsp.InitializeRequest.type.method) {
         let initializeParams = message.params as lsp.InitializeParams;
-
         if (
           languageDetails.languageId === config.java.languageId ||
           languageDetails.languageId === config.c.languageId ||

@@ -90,14 +90,25 @@ const createEditorInstanse = (selectedLanguage: string) =>
         disableAutoCompleteStyle.textContent = `.suggest-widget{display:none !important}`;
         document.head.append(disableAutoCompleteStyle);
       }
-      if (TEST_CONFIG.ENABLE_COPY_PASTE === false) {
-        monacoInstance.onKeyDown((event: any) => {
+
+      monacoInstance.onKeyDown((event: any) => {
+        if (TEST_CONFIG.ENABLE_COPY_PASTE === false) {
           const { keyCode, ctrlKey, metaKey } = event;
           if ((keyCode === 33 || keyCode === 52) && (metaKey || ctrlKey)) {
             event.preventDefault();
           }
-        });
-      }
+        }
+
+        // const readonlyRange = new monaco.Range(1, 0, 5, 0);
+
+        // const contains = monacoInstance
+        //   .getSelections()
+        //   .findIndex((range: any) => readonlyRange.intersectRanges(range));
+        // if (contains !== -1) {
+        //   event.stopPropagation();
+        //   event.preventDefault(); // for Ctrl+C, Ctrl+V
+        // }
+      });
     } else {
       monacoInstance.setModel(monacoModel);
     }
@@ -217,7 +228,7 @@ init();
 //   };
 // }
 
-//let allEvents: AssessEvent[] = [];
+// let allEvents: AssessEvent[] = [];
 
 // const handleMonacoContentChange = (event: any) => {
 //   let action = null;

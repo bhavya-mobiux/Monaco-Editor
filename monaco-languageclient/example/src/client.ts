@@ -29,12 +29,12 @@ interface editorConfig {
   selectedLanguage?: string;
   disableCopyPaste?: boolean | false;
   enableAutoComplete?: boolean | false;
-  createEmptyInstanse?: boolean | false;
 }
 
 let monacoInstance: any;
 let LANGUAGE_ID: string;
 let monacoModel: monaco.editor.ITextModel;
+let enableEditorAutoComplete: boolean;
 
 let webSocket: WebSocket;
 
@@ -50,11 +50,11 @@ const registerLanguagesWithMonaco = () => {
   }
 };
 
-const createEditorInstanse = (config: editorConfig) =>
+const createEditorInstanse = ({ selectedLanguage, disableCopyPaste, enableAutoComplete }: editorConfig) =>
   new Promise<string>((resolve, reject) => {
-    console.log('editor config', config);
-    if (config && config.createEmptyInstanse) {
-      monacoInstance = monaco.editor.create(
+    console.log(`selectedLanguage ${selectedLanguage} ${disableCopyPaste} ${enableAutoComplete}`);
+    if (!selectedLanguage) {
+      monaco.editor.create(
         document.getElementById("container")!,
         {
           model: null,
@@ -65,11 +65,6 @@ const createEditorInstanse = (config: editorConfig) =>
         }
       );
       return resolve("instanse created without model");
-    }
-    const selectedLanguage = config && config.selectedLanguage ? config.selectedLanguage : null
-    console.log(`selectedLanguage ${selectedLanguage}`);
-    if(!selectedLanguage){
-      return reject("provide Language Id");
     }
     window.__selectedLanguage === selectedLanguage
       ? reject("Language Id already selected")
@@ -106,13 +101,13 @@ const createEditorInstanse = (config: editorConfig) =>
         }
       );
 
-      if (config && !!config.enableAutoComplete) {
+      if (enableAutoComplete === false) {
         const disableAutoCompleteStyle = document.createElement("style");
         disableAutoCompleteStyle.textContent = `.suggest-widget{display:none !important}`;
         document.head.append(disableAutoCompleteStyle);
       }
 
-      if (config && config.disableCopyPaste) {
+      if (disableCopyPaste) {
         monacoInstance.onKeyDown((event: any) => {
           const { keyCode, ctrlKey, metaKey } = event;
           if ((keyCode === 33 || keyCode === 52) && (metaKey || ctrlKey)) {
@@ -151,15 +146,16 @@ function createWebSocket(url: string): WebSocket {
   return new ReconnectingWebSocket(url, [], socketOptions);
 }
 
-const OnLoadEditor = function (config: editorConfig) {
-  createEditorInstanse(config)
+const OnLoadEditor = function ({ selectedLanguage = '', disableCopyPaste = false, enableAutoComplete = true }: editorConfig) {
+  enableEditorAutoComplete = enableAutoComplete;
+  createEditorInstanse({ selectedLanguage, disableCopyPaste, enableAutoComplete })
     .then(() => {
-      //assigning __monacoInstanceCreated key in window
-      window.__monacoInstanceCreated =
-        window.__monacoInstanceCreated || monacoInstance || null;
 
       // If the websocket is present and open close the socket connection
-      if (config && config.selectedLanguage) {
+      if (selectedLanguage) {
+        //assigning __monacoInstanceCreated key in window
+        window.__monacoInstanceCreated =
+          window.__monacoInstanceCreated || monacoInstance || null;
         const url = createUrl(`/sampleServer`);
         webSocket = createWebSocket(url);
         listenToWebSocketOpening();
@@ -170,7 +166,7 @@ const OnLoadEditor = function (config: editorConfig) {
     });
 };
 
-//assigning __monacoInstanceCreated key in window
+//assigning __loadEditor key in window
 window.__loadEditor = window.__loadEditor || OnLoadEditor || null;
 
 // install Monaco language client services
@@ -206,7 +202,7 @@ function createLanguageClient(
 function createUrl(path: string): string {
   const protocol = location.protocol === "https:" ? "wss" : "ws";
   const socketUrl = normalizeUrl(
-    `${protocol}://${location.host}${location.pathname}${path}?language=${LANGUAGE_ID}&enableAutoComplete=${false}`
+    `${protocol}://${location.host}${location.pathname}${path}?language=${LANGUAGE_ID}&enableAutoComplete=${enableEditorAutoComplete}`
   );
   console.log("URL here: ", socketUrl);
 
@@ -214,14 +210,14 @@ function createUrl(path: string): string {
 
   //for local ngnix
   // const port = 8000;
-  // return normalizeUrl(`${protocol}://${location.host}:${port}${path}`);
+  // return normalizeUrl(`${protocol}://${location.host}:${port}${path}?language=${LANGUAGE_ID}&enableAutoComplete=${enableEditorAutoComplete}`);
 }
 
 
 const init = () => {
   registerLanguagesWithMonaco();
   //createEditorInstanse({ selectedLanguage: "python", enableAutoComplete: false }).then(() => { });
-  window.__loadEditor();
+  window.__loadEditor({});
 };
 
 init();

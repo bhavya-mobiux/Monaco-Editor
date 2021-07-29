@@ -22,17 +22,38 @@ declare global {
   }
 }
 
-let monacoInstance: any;
-let LANGUAGE_ID: string;
-
 //assigning __monaco key in window
 window.__monaco = window.__monaco || monaco || null;
 
+interface editorConfig {
+  selectedLanguage: string;
+  disableCopyPaste: boolean | false;
+  enableAutoComplete: boolean | false;
+}
+
+let monacoInstance: any;
+let LANGUAGE_ID: string;
+let monacoModel: monaco.editor.ITextModel;
+
 let webSocket: WebSocket;
 
-const createEditorInstanse = (selectedLanguage: string) =>
+const registerLanguagesWithMonaco = () => {
+  const supportedLanguages = Object.keys(CONFIG);
+  for (var i = 0; i < supportedLanguages.length; i++) {
+    const { languageId, extensions, mimetypes } = CONFIG[supportedLanguages[i]];
+    monaco.languages.register({
+      id: languageId,
+      extensions,
+      mimetypes,
+    });
+  }
+};
+
+const createEditorInstanse = (config: editorConfig) =>
   new Promise<string>((resolve, reject) => {
+    const selectedLanguage = config && config.selectedLanguage ? config.selectedLanguage : null
     console.log(`selectedLanguage ${selectedLanguage}`);
+    console.log('editor config', config);
     if (!selectedLanguage) {
       monacoInstance = monaco.editor.create(
         document.getElementById("container")!,
@@ -52,62 +73,56 @@ const createEditorInstanse = (selectedLanguage: string) =>
       : (window.__selectedLanguage = selectedLanguage);
 
     let languageDetails = CONFIG[selectedLanguage];
-    console.log("Language details here: ", languageDetails);
 
     // register Monaco languages
-    const { extensions, mimetypes, languageId, snippet, file } =
-      languageDetails;
+    const { languageId, defaultSnippet, file } = languageDetails;
+
     LANGUAGE_ID = languageId;
     let FILE_NAME = file;
 
-    monaco.languages.register({
-      id: LANGUAGE_ID,
-      extensions,
-      mimetypes,
-    });
+    // If the monaco editor is already present dispose of the editor first before creating a new one
+    monacoModel && monacoModel.dispose();
 
-    // create Monaco editor
-    const model = monacoInstance && monacoInstance.getModel() || null;
-    let editorModel: monaco.editor.ITextModel;
-    if (model) {
-      const oldValue = model.getValue();
-      const oldLanguage = model.getModeId();
-      model.dispose();
-      editorModel = monaco.editor.createModel(
-        oldValue,
-        oldLanguage,
-        monaco.Uri.parse(FILE_NAME)
-      )
-    } else {
-      editorModel = monaco.editor.createModel(
-        snippet,
-        LANGUAGE_ID, //java||python||c||cpp||go||js
-        monaco.Uri.parse(FILE_NAME) // file for monaco editor
-      );
-    }
+    // create Monaco monacoModel
+    monacoModel = monaco.editor.createModel(
+      defaultSnippet,
+      LANGUAGE_ID, //java||python||c||cpp||go||js
+      monaco.Uri.parse(FILE_NAME) // file for monaco editor
+    );
 
     // If the monacoInstance is not present create a new monaco instance else set the new model with new language details
     if (!monacoInstance) {
       monacoInstance = monaco.editor.create(
         document.getElementById("container")!,
         {
-          model: editorModel,
+          model: monacoModel,
           glyphMargin: true,
           lightbulb: {
             enabled: true,
           },
         }
       );
+
+      if (config && config.enableAutoComplete === false) {
+        const disableAutoCompleteStyle = document.createElement("style");
+        disableAutoCompleteStyle.textContent = `.suggest-widget{display:none !important}`;
+        document.head.append(disableAutoCompleteStyle);
+      }
+
+      if (config && config.disableCopyPaste) {
+        monacoInstance.onKeyDown((event: any) => {
+          const { keyCode, ctrlKey, metaKey } = event;
+          if ((keyCode === 33 || keyCode === 52) && (metaKey || ctrlKey)) {
+            event.preventDefault();
+          }
+        });
+      }
+
     } else {
-      monacoInstance.setModel(editorModel);// model is not updating properly need to test,
-      //with adding below code works okay
-      //monaco.editor.setModelLanguage(monacoInstance.getModel(), LANGUAGE_ID);// without this line auto suggestion doesnot work, gets diff error with this need to look
-      //monacoInstance.getModel().setValue(snippet);
+      monacoInstance.setModel(monacoModel);
     }
     resolve("Instance created");
   });
-
-//createEditorInstanse("python").then(() => { });
 
 // listen when the web socket is opened
 const listenToWebSocketOpening = () => {
@@ -122,22 +137,28 @@ const listenToWebSocketOpening = () => {
   });
 };
 
-// Running the default python language server
-// const url = createUrl(`/sampleServer?language=python`);
-// webSocket = createWebSocket(url);
-// listenToWebSocketOpening();
+function createWebSocket(url: string): WebSocket {
+  const socketOptions = {
+    maxReconnectionDelay: 10000,
+    minReconnectionDelay: 1000,
+    reconnectionDelayGrowFactor: 1.3,
+    connectionTimeout: 10000,
+    maxRetries: Infinity,
+    debug: false,
+  };
+  return new ReconnectingWebSocket(url, [], socketOptions);
+}
 
-const OnLoadEditor = function (selectedLanguage: string) {
-  createEditorInstanse(selectedLanguage)
+const OnLoadEditor = function (config: editorConfig) {
+  createEditorInstanse(config)
     .then(() => {
       //assigning __monacoInstanceCreated key in window
       window.__monacoInstanceCreated =
         window.__monacoInstanceCreated || monacoInstance || null;
 
       // If the websocket is present and open close the socket connection
-      if (selectedLanguage) {
-        const url = createUrl(`/sampleServer?language=${selectedLanguage}`);
-        console.log("Connecting to websocket: ", url);
+      if (config && config.selectedLanguage) {
+        const url = createUrl(`/sampleServer`);
         webSocket = createWebSocket(url);
         listenToWebSocketOpening();
       }
@@ -149,9 +170,6 @@ const OnLoadEditor = function (selectedLanguage: string) {
 
 //assigning __monacoInstanceCreated key in window
 window.__loadEditor = window.__loadEditor || OnLoadEditor || null;
-
-//call for loading editor
-window.__loadEditor();
 
 // install Monaco language client services
 MonacoServices.install(monaco);
@@ -185,25 +203,26 @@ function createLanguageClient(
 
 function createUrl(path: string): string {
   const protocol = location.protocol === "https:" ? "wss" : "ws";
-  // return normalizeUrl(
-  //   `${protocol}://${location.host}${location.pathname}${path}`
-  // );
+  const socketUrl = normalizeUrl(
+    `${protocol}://${location.host}${location.pathname}${path}?language=${LANGUAGE_ID}&enableAutoComplete=${false}`
+  );
+  console.log("URL here: ", socketUrl);
+
+  return socketUrl;
+
   //for local ngnix
-  const port = 8000;
-  return normalizeUrl(`${protocol}://${location.host}:${port}${path}`);
+  // const port = 8000;
+  // return normalizeUrl(`${protocol}://${location.host}:${port}${path}`);
 }
 
-function createWebSocket(url: string): WebSocket {
-  const socketOptions = {
-    maxReconnectionDelay: 10000,
-    minReconnectionDelay: 1000,
-    reconnectionDelayGrowFactor: 1.3,
-    connectionTimeout: 10000,
-    maxRetries: Infinity,
-    debug: false,
-  };
-  return new ReconnectingWebSocket(url, [], socketOptions);
-}
+
+const init = () => {
+  registerLanguagesWithMonaco();
+  //createEditorInstanse("python").then(() => {});
+  window.__loadEditor({ selectedLanguage: "python" });
+};
+
+init();
 
 // interface AssessEvent {
 //   action: string | null;

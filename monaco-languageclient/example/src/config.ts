@@ -7,7 +7,7 @@ const languages: { [key: string]: any } = {
     startLSCommand: "pylsp",
     options: ["-v"],
     logFile: "../log/log-python.txt",
-    snippet: `const a = 10`,
+    defaultSnippet: `const a = 10`,
   },
   java: {
     languageId: "java",
@@ -24,7 +24,7 @@ const languages: { [key: string]: any } = {
     rootUri:
       "file:///home/yamini/hirepro/jedi/monaco-languageclient/example/src/",
     logFile: "../log/log-java.txt",
-    snippet: `class HelloWorld {
+    defaultSnippet: `class HelloWorld {
         public static void main(String[] args) {
             System.out.println("Hello, World!"); 
         }
@@ -44,7 +44,7 @@ const languages: { [key: string]: any } = {
     rootUri:
       "file:///home/yamini/hirepro/jedi/monaco-languageclient/example/src/",
     logFile: "../log/log-c.txt",
-    snippet: `#include <stdio.h>
+    defaultSnippet: `#include <stdio.h>
     int main() {
        // printf() displays the string inside quotation
        printf("Hello, World!");
@@ -65,7 +65,7 @@ const languages: { [key: string]: any } = {
     rootUri:
       "file:///home/yamini/hirepro/jedi/monaco-languageclient/example/src/",
     logFile: "../log/log-cpp.txt",
-    snippet: `#include <iostream>
+    defaultSnippet: `#include <iostream>
 
     int main() {
         std::cout << "Hello World!";

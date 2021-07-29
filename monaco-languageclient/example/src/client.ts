@@ -26,9 +26,10 @@ declare global {
 window.__monaco = window.__monaco || monaco || null;
 
 interface editorConfig {
-  selectedLanguage: string;
-  disableCopyPaste: boolean | false;
-  enableAutoComplete: boolean | false;
+  selectedLanguage?: string;
+  disableCopyPaste?: boolean | false;
+  enableAutoComplete?: boolean | false;
+  createEmptyInstanse?: boolean | false;
 }
 
 let monacoInstance: any;
@@ -51,10 +52,8 @@ const registerLanguagesWithMonaco = () => {
 
 const createEditorInstanse = (config: editorConfig) =>
   new Promise<string>((resolve, reject) => {
-    const selectedLanguage = config && config.selectedLanguage ? config.selectedLanguage : null
-    console.log(`selectedLanguage ${selectedLanguage}`);
     console.log('editor config', config);
-    if (!selectedLanguage) {
+    if (config && config.createEmptyInstanse) {
       monacoInstance = monaco.editor.create(
         document.getElementById("container")!,
         {
@@ -67,7 +66,11 @@ const createEditorInstanse = (config: editorConfig) =>
       );
       return resolve("instanse created without model");
     }
-
+    const selectedLanguage = config && config.selectedLanguage ? config.selectedLanguage : null
+    console.log(`selectedLanguage ${selectedLanguage}`);
+    if(!selectedLanguage){
+      return reject("provide Language Id");
+    }
     window.__selectedLanguage === selectedLanguage
       ? reject("Language Id already selected")
       : (window.__selectedLanguage = selectedLanguage);
@@ -103,7 +106,7 @@ const createEditorInstanse = (config: editorConfig) =>
         }
       );
 
-      if (config && config.enableAutoComplete === false) {
+      if (config && !!config.enableAutoComplete) {
         const disableAutoCompleteStyle = document.createElement("style");
         disableAutoCompleteStyle.textContent = `.suggest-widget{display:none !important}`;
         document.head.append(disableAutoCompleteStyle);
@@ -117,7 +120,6 @@ const createEditorInstanse = (config: editorConfig) =>
           }
         });
       }
-
     } else {
       monacoInstance.setModel(monacoModel);
     }
@@ -218,8 +220,8 @@ function createUrl(path: string): string {
 
 const init = () => {
   registerLanguagesWithMonaco();
-  //createEditorInstanse("python").then(() => {});
-  window.__loadEditor({ selectedLanguage: "python" });
+  //createEditorInstanse({ selectedLanguage: "python", enableAutoComplete: false }).then(() => { });
+  window.__loadEditor();
 };
 
 init();

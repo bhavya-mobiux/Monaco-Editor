@@ -85,9 +85,14 @@ const createEditorInstanse = (selectedLanguage: string) =>
         }
       );
 
+      monacoInstance.onDidChangeModelContent((event: any) => {
+        const data = handleMonacoContentChange(event);
+        allEvents.push(data);
+      });
+
       if (TEST_CONFIG.ENABLE_AUTOCOMPLETE === false) {
         const disableAutoCompleteStyle = document.createElement("style");
-        disableAutoCompleteStyle.textContent = `.suggest-widget{display:none !important}`;
+        disableAutoCompleteStyle.textContent = `.suggest-widget{display:none !important} .suggest-details-container{display:none !important}`;
         document.head.append(disableAutoCompleteStyle);
       }
 
@@ -219,49 +224,63 @@ const init = () => {
 
 init();
 
-// interface AssessEvent {
-//   action: string | null;
-//   delta: {
-//     lines: any;
-//     start: { row: any; column: any };
-//     end: { row: any; column: any };
-//   };
-// }
+interface AssessEvent {
+  action: string | null;
+  delta: {
+    lines: any;
+    start: { row: any; column: any };
+    end: { row: any; column: any };
+  };
+}
 
-// let allEvents: AssessEvent[] = [];
+let allEvents: AssessEvent[] = [];
 
-// const handleMonacoContentChange = (event: any) => {
-//   let action = null;
-//   if (event.changes[0].text === "\n") {
-//     // New line inserted
-//     action = "insert";
-//   } else if (event.changes[0].text === "") {
-//     action = "remove";
-//   } else if (
-//     event.changes[0].range.startColumn === event.changes[0].range.endColumn
-//   ) {
-//     action = "insert";
-//   } else if (
-//     event.changes[0].range.endColumn > event.changes[0].range.startColumn
-//   ) {
-//     action = "remove";
-//   }
-//   const retval = {
-//     action,
-//     delta: {
-//       lines:
-//         event.changes[0].text.length > 0
-//           ? event.changes[0].text.split("\n")
-//           : event.changes[0].text,
-//       start: {
-//         row: event.changes[0].range.startLineNumber,
-//         column: event.changes[0].range.startColumn,
-//       },
-//       end: {
-//         row: event.changes[0].range.endLineNumber,
-//         column: event.changes[0].range.endColumn,
-//       },
-//     },
-//   };
-//   return retval;
-// };
+const handleMonacoContentChange = (event: any) => {
+  let {
+    range: { startLineNumber, startColumn, endLineNumber, endColumn },
+    text,
+    isRedoing,
+    isUndoing,
+  } = event.changes[0];
+
+  console.log("Event here: ", event);
+  let action = null;
+
+  let isAutoComplete = false;
+
+  if (isRedoing === true) {
+    action = "insert";
+  } else if (isUndoing === true) {
+    action = "remove";
+  } else if (text === "\n") {
+    // New line inserted
+    action = "insert";
+  } else if (text === "") {
+    action = "remove";
+  } else if (startColumn === endColumn) {
+    action = "insert";
+  } else if (endColumn > startColumn) {
+    action = "insert";
+    isAutoComplete = text.length > 1;
+  }
+
+  let lines = null;
+  lines = text !== "\n" && text.length > 0 ? text.split("\n") : text;
+
+  const retval = {
+    action,
+    delta: {
+      lines,
+      start: {
+        row: startLineNumber,
+        column: startColumn,
+      },
+      end: {
+        row: endLineNumber,
+        column: endColumn,
+      },
+    },
+  };
+  console.log("Final event here: ", retval);
+  return retval;
+};

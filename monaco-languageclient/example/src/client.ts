@@ -12,6 +12,7 @@ import normalizeUrl = require("normalize-url");
 const ReconnectingWebSocket = require("reconnecting-websocket");
 import CONFIG from "./config";
 import { TEST_CONFIG } from "./test-config";
+import * as restrictMonacoRanges from "./restrict";
 
 //declare gobal
 declare global {
@@ -63,13 +64,20 @@ const createEditorInstanse = (selectedLanguage: string) =>
     // If the monaco editor is already present dispose of the editor first before creating a new one
     monacoModel && monacoModel.dispose();
 
-    // monaco.getMo
-
     // create Monaco monacoModel
+
     monacoModel = monaco.editor.createModel(
       snippet,
       LANGUAGE_ID, //java||python||c||cpp||go||js
       monaco.Uri.parse(FILE_NAME) // file for monaco editor
+    );
+
+    // Result monaco
+
+    monacoModel = restrictMonacoRanges.default(
+      monacoModel,
+      [{ range: [1, 0, 5, 0] }, { range: [10, 0, 15, 0] }], // startLineNumber, startColumnNumber, endLineNumber, endColumnNumber
+      monaco.Range
     );
 
     // If the monacoInstance is not present create a new monaco instance else set the new model with new language details
@@ -246,7 +254,7 @@ const handleMonacoContentChange = (event: any) => {
   console.log("Event here: ", event);
   let action = null;
 
-  let isAutoComplete = false;
+  // let isAutoComplete = false;
 
   if (isRedoing === true) {
     action = "insert";
@@ -261,7 +269,7 @@ const handleMonacoContentChange = (event: any) => {
     action = "insert";
   } else if (endColumn > startColumn) {
     action = "insert";
-    isAutoComplete = text.length > 1;
+    // isAutoComplete = text.length > 1;
   }
 
   let lines = null;

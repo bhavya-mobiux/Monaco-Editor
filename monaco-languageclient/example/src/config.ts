@@ -7,7 +7,7 @@ const languages: { [key: string]: any } = {
     startLSCommand: "pylsp",
     options: ["-v"],
     logFile: "../log/log-python.txt",
-    snippet: `const a = 10`,
+    snippet: `const a = 10 \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n`,
   },
   java: {
     languageId: "java",

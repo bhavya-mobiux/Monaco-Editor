@@ -73,6 +73,10 @@ const createEditorInstanse = (selectedLanguage: string) =>
     );
 
     // Result monaco
+    TEST_CONFIG.EDITABLE_AREA.map((element) => {
+      console.log("Element here: ", element);
+      return { range: [element[0], 0, element[1], 0] };
+    });
 
     monacoModel = restrictMonacoRanges.default(
       monacoModel,
@@ -95,7 +99,7 @@ const createEditorInstanse = (selectedLanguage: string) =>
 
       monacoInstance.onDidChangeModelContent((event: any) => {
         const data = handleMonacoContentChange(event);
-        allEvents.push(data);
+        data !== null && allEvents.push(data);
       });
 
       if (TEST_CONFIG.ENABLE_AUTOCOMPLETE === false) {
@@ -111,16 +115,6 @@ const createEditorInstanse = (selectedLanguage: string) =>
             event.preventDefault();
           }
         }
-
-        // const readonlyRange = new monaco.Range(1, 0, 5, 0);
-
-        // const contains = monacoInstance
-        //   .getSelections()
-        //   .findIndex((range: any) => readonlyRange.intersectRanges(range));
-        // if (contains !== -1) {
-        //   event.stopPropagation();
-        //   event.preventDefault(); // for Ctrl+C, Ctrl+V
-        // }
       });
     } else {
       monacoInstance.setModel(monacoModel);
@@ -155,13 +149,9 @@ function createUrl(path: string): string {
   const socketUrl = normalizeUrl(
     `${protocol}://${location.host}${location.pathname}${path}?language=${LANGUAGE_ID}&enableAutoComplete=${TEST_CONFIG.ENABLE_AUTOCOMPLETE}`
   );
-  console.log("URL here: ", socketUrl);
+  console.log("Socket URL: ", socketUrl);
 
   return socketUrl;
-
-  //for local ngnix
-  // const port = 8000;
-  // return normalizeUrl(`${protocol}://${location.host}:${port}${path}`);
 }
 
 function createWebSocket(url: string): WebSocket {
@@ -191,9 +181,6 @@ const OnLoadEditor = function (selectedLanguage: string) {
 
 //assigning __monacoInstanceCreated key in window
 window.__loadEditor = window.__loadEditor || OnLoadEditor || null;
-
-//call for loading editor
-// window.__loadEditor("python");
 
 // install Monaco language client services
 MonacoServices.install(monaco);
@@ -251,44 +238,56 @@ const handleMonacoContentChange = (event: any) => {
     isUndoing,
   } = event.changes[0];
 
-  console.log("Event here: ", event);
-  let action = null;
+  if (TEST_CONFIG.EDITABLE_AREA && TEST_CONFIG.EDITABLE_AREA.length > 0) {
+    for (var i = 0; i < TEST_CONFIG.EDITABLE_AREA.length; i++) {
+      if (
+        (startLineNumber >= TEST_CONFIG.EDITABLE_AREA[i][0] &&
+          startLineNumber <= TEST_CONFIG.EDITABLE_AREA[i][1]) ||
+        (endLineNumber >= TEST_CONFIG.EDITABLE_AREA[i][0] &&
+          endLineNumber <= TEST_CONFIG.EDITABLE_AREA[i][1])
+      ) {
+        console.log("Event here: ", event);
+        let action = null;
 
-  // let isAutoComplete = false;
+        // let isAutoComplete = false;
 
-  if (isRedoing === true) {
-    action = "insert";
-  } else if (isUndoing === true) {
-    action = "remove";
-  } else if (text === "\n") {
-    // New line inserted
-    action = "insert";
-  } else if (text === "") {
-    action = "remove";
-  } else if (startColumn === endColumn) {
-    action = "insert";
-  } else if (endColumn > startColumn) {
-    action = "insert";
-    // isAutoComplete = text.length > 1;
+        if (isRedoing === true) {
+          action = "insert";
+        } else if (isUndoing === true) {
+          action = "remove";
+        } else if (text === "\n") {
+          // New line inserted
+          action = "insert";
+        } else if (text === "") {
+          action = "remove";
+        } else if (startColumn === endColumn) {
+          action = "insert";
+        } else if (endColumn > startColumn) {
+          action = "insert";
+          // isAutoComplete = text.length > 1;
+        }
+
+        let lines = null;
+        lines = text !== "\n" && text.length > 0 ? text.split("\n") : text;
+
+        const retval = {
+          action,
+          delta: {
+            lines,
+            start: {
+              row: startLineNumber,
+              column: startColumn,
+            },
+            end: {
+              row: endLineNumber,
+              column: endColumn,
+            },
+          },
+        };
+        console.log("Final event here: ", retval);
+        return retval;
+      }
+    }
   }
-
-  let lines = null;
-  lines = text !== "\n" && text.length > 0 ? text.split("\n") : text;
-
-  const retval = {
-    action,
-    delta: {
-      lines,
-      start: {
-        row: startLineNumber,
-        column: startColumn,
-      },
-      end: {
-        row: endLineNumber,
-        column: endColumn,
-      },
-    },
-  };
-  console.log("Final event here: ", retval);
-  return retval;
+  return null;
 };

@@ -12,7 +12,7 @@ import normalizeUrl = require("normalize-url");
 const ReconnectingWebSocket = require("reconnecting-websocket");
 import CONFIG from "./config";
 import { TEST_CONFIG } from "./test-config";
-import * as restrictMonacoRanges from "./restrict";
+//import * as restrictMonacoRanges from "./restrict";
 
 //declare gobal
 declare global {
@@ -73,16 +73,16 @@ const createEditorInstanse = (selectedLanguage: string) =>
     );
 
     // Result monaco
-    TEST_CONFIG.EDITABLE_AREA.map((element) => {
-      console.log("Element here: ", element);
-      return { range: [element[0], 0, element[1], 0] };
-    });
+    // TEST_CONFIG.EDITABLE_AREA.map((element) => {
+    //   console.log("Element here: ", element);
+    //   return { range: [element[0], 0, element[1], 0] };
+    // });
 
-    monacoModel = restrictMonacoRanges.default(
-      monacoModel,
-      [{ range: [1, 0, 5, 0] }, { range: [10, 0, 15, 0] }], // startLineNumber, startColumnNumber, endLineNumber, endColumnNumber
-      monaco.Range
-    );
+    // monacoModel = restrictMonacoRanges.default(
+    //   monacoModel,
+    //   [{ range: [1, 0, 5, 0] }, { range: [10, 0, 15, 0] }], // startLineNumber, startColumnNumber, endLineNumber, endColumnNumber
+    //   monaco.Range
+    // );
 
     // If the monacoInstance is not present create a new monaco instance else set the new model with new language details
     if (!monacoInstance) {
@@ -115,7 +115,38 @@ const createEditorInstanse = (selectedLanguage: string) =>
             event.preventDefault();
           }
         }
+        //adding read only blocks
+        TEST_CONFIG.READONLY_RANGES.map((element) => {
+          const readonlyRange = new monaco.Range(element[0], 0, element[1], 0);
+          console.log("readOnlyRange", readonlyRange);
+          console.log("getSelections", monacoInstance.getSelections())
+          const contains = monacoInstance
+            .getSelections()
+            .findIndex((range: any) => readonlyRange.intersectRanges(range));
+          if (contains !== -1) {
+            event.stopPropagation();
+            event.preventDefault(); // for Ctrl+C, Ctrl+V
+          }
+        });
       });
+
+      //adding markers
+      monacoInstance.deltaDecorations([], [
+        {
+          range: new monaco.Range(1, 1, 3, 1),
+          options: {
+            isWholeLine: true,
+            className: 'greenDecorator',
+          }
+        }, {
+          range: new monaco.Range(7, 1, 9, 1),
+          options: {
+            isWholeLine: true,
+            className: 'blueDecorator',
+          }
+        }
+      ]);
+
     } else {
       monacoInstance.setModel(monacoModel);
     }
@@ -214,7 +245,7 @@ function createLanguageClient(
 
 const init = () => {
   registerLanguagesWithMonaco();
-  createEditorInstanse("python").then(() => {});
+  createEditorInstanse("python").then(() => { });
 };
 
 init();

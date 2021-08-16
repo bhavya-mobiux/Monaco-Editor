@@ -11,6 +11,7 @@ import {
 import normalizeUrl = require("normalize-url");
 const ReconnectingWebSocket = require("reconnecting-websocket");
 import CONFIG from "./config";
+import { EDITOR_CONFIG } from "./editor-configs";
 
 //declare gobal
 declare global {
@@ -47,6 +48,10 @@ const registerLanguagesWithMonaco = () => {
       id: languageId,
       extensions,
       mimetypes,
+    });
+    monaco.languages.setLanguageConfiguration(languageId, {
+      surroundingPairs: EDITOR_CONFIG.SURROUNDING_PAIRS,
+      autoClosingPairs: EDITOR_CONFIG.AUTO_CLOSING_PAIRS,
     });
   }
 };
@@ -225,50 +230,3 @@ const init = () => {
 };
 
 init();
-
-// interface AssessEvent {
-//   action: string | null;
-//   delta: {
-//     lines: any;
-//     start: { row: any; column: any };
-//     end: { row: any; column: any };
-//   };
-// }
-
-//let allEvents: AssessEvent[] = [];
-
-// const handleMonacoContentChange = (event: any) => {
-//   let action = null;
-//   if (event.changes[0].text === "\n") {
-//     // New line inserted
-//     action = "insert";
-//   } else if (event.changes[0].text === "") {
-//     action = "remove";
-//   } else if (
-//     event.changes[0].range.startColumn === event.changes[0].range.endColumn
-//   ) {
-//     action = "insert";
-//   } else if (
-//     event.changes[0].range.endColumn > event.changes[0].range.startColumn
-//   ) {
-//     action = "remove";
-//   }
-//   const retval = {
-//     action,
-//     delta: {
-//       lines:
-//         event.changes[0].text.length > 0
-//           ? event.changes[0].text.split("\n")
-//           : event.changes[0].text,
-//       start: {
-//         row: event.changes[0].range.startLineNumber,
-//         column: event.changes[0].range.startColumn,
-//       },
-//       end: {
-//         row: event.changes[0].range.endLineNumber,
-//         column: event.changes[0].range.endColumn,
-//       },
-//     },
-//   };
-//   return retval;
-// };

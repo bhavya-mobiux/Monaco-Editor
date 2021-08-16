@@ -42,6 +42,10 @@ const registerLanguagesWithMonaco = () => {
       extensions,
       mimetypes,
     });
+    monaco.languages.setLanguageConfiguration(languageId, {
+      surroundingPairs: TEST_CONFIG.SURROUNDING_PAIRS,
+      autoClosingPairs: TEST_CONFIG.AUTO_CLOSING_PAIRS,
+    });
   }
 };
 
@@ -91,6 +95,7 @@ const createEditorInstanse = (selectedLanguage: string) =>
         {
           model: monacoModel,
           glyphMargin: true,
+          autoClosingBrackets: "always",
           lightbulb: {
             enabled: true,
           },

@@ -5,4 +5,19 @@ export const TEST_CONFIG = {
     [1, 5],
     [10, 15],
   ],
+  SURROUNDING_PAIRS: [
+    { open: "{", close: "}" },
+    { open: "[", close: "]" },
+    { open: "(", close: ")" },
+    { open: "<", close: ">" },
+    { open: "'", close: "'" },
+    { open: '"', close: '"' },
+  ],
+  AUTO_CLOSING_PAIRS: [
+    { open: "{", close: "}" },
+    { open: "[", close: "]" },
+    { open: "(", close: ")" },
+    { open: "'", close: "'", notIn: ["string", "comment"] },
+    { open: '"', close: '"', notIn: ["string", "comment"] },
+  ],
 };

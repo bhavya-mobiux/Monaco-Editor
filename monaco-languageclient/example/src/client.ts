@@ -31,6 +31,7 @@ interface editorConfig {
   disableCopyPaste?: boolean | false;
   enableAutoComplete?: boolean | false;
   modifiedCodeSnippet?: string;
+  disableAutocompleteHelp?: boolean | false;
 }
 
 let monacoInstance: any;
@@ -56,12 +57,18 @@ const registerLanguagesWithMonaco = () => {
   }
 };
 
-const createEditorInstanse = ({ selectedLanguage, disableCopyPaste, enableAutoComplete, modifiedCodeSnippet }: editorConfig) =>
+const createEditorInstanse = ({
+  selectedLanguage,
+  disableCopyPaste,
+  enableAutoComplete,
+  modifiedCodeSnippet,
+  disableAutocompleteHelp
+}: editorConfig) =>
   new Promise<string>((resolve, reject) => {
     //console.log(`selectedLanguage ${selectedLanguage} ${disableCopyPaste} ${enableAutoComplete} ${modifiedCodeSnippet}`);
     if (!selectedLanguage) {
       monaco.editor.create(
-        document.getElementById("container")!,
+        document.getElementById("hirepro-monaco-container")!,
         {
           theme: 'vs-dark',
           model: null,
@@ -69,6 +76,15 @@ const createEditorInstanse = ({ selectedLanguage, disableCopyPaste, enableAutoCo
           lightbulb: {
             enabled: true,
           },
+          automaticLayout: true,
+          scrollBeyondLastLine: false,
+          wordWrap: 'on',
+          wrappingStrategy: 'advanced',
+          minimap: {
+            enabled: false
+          },
+          overviewRulerLanes: 0,
+          readOnly: false
         }
       );
       return resolve("instanse created without model");
@@ -99,7 +115,7 @@ const createEditorInstanse = ({ selectedLanguage, disableCopyPaste, enableAutoCo
     // If the monacoInstance is not present create a new monaco instance else set the new model with new language details
     if (!monacoInstance) {
       monacoInstance = monaco.editor.create(
-        document.getElementById("container")!,
+        document.getElementById("hirepro-monaco-container")!,
         {
           theme: 'vs-dark',
           model: monacoModel,
@@ -107,6 +123,15 @@ const createEditorInstanse = ({ selectedLanguage, disableCopyPaste, enableAutoCo
           lightbulb: {
             enabled: true,
           },
+          automaticLayout: true,
+          scrollBeyondLastLine: false,
+          wordWrap: 'on',
+          wrappingStrategy: 'advanced',
+          minimap: {
+            enabled: false
+          },
+          overviewRulerLanes: 0,
+          readOnly: false
         }
       );
 
@@ -124,9 +149,17 @@ const createEditorInstanse = ({ selectedLanguage, disableCopyPaste, enableAutoCo
           }
         });
       }
+      if (disableAutocompleteHelp) {
+        monacoInstance.updateOptions({
+          parameterHints: {
+            enabled: false
+          },
+        });
+      }
     } else {
       monacoInstance.setModel(monacoModel);
     }
+
     //assigning __monacoInstanceCreated key in window
     window.__monacoInstanceCreated =
       window.__monacoInstanceCreated || monacoInstance || null;
@@ -158,9 +191,20 @@ function createWebSocket(url: string): WebSocket {
   return new ReconnectingWebSocket(url, [], socketOptions);
 }
 
-const OnLoadEditor = function ({ selectedLanguage = '', disableCopyPaste = false, enableAutoComplete = true, modifiedCodeSnippet }: editorConfig) {
+const OnLoadEditor = function ({
+  selectedLanguage = '',
+  disableCopyPaste = false,
+  enableAutoComplete = true,
+  modifiedCodeSnippet,
+  disableAutocompleteHelp = false }: editorConfig) {
   enableEditorAutoComplete = enableAutoComplete;
-  createEditorInstanse({ selectedLanguage, disableCopyPaste, enableAutoComplete, modifiedCodeSnippet })
+  createEditorInstanse({
+    selectedLanguage,
+    disableCopyPaste,
+    enableAutoComplete,
+    modifiedCodeSnippet,
+    disableAutocompleteHelp
+  })
     .then(() => {
 
       // If the websocket is present and open close the socket connection
@@ -225,7 +269,7 @@ function createUrl(path: string): string {
 
 const init = () => {
   registerLanguagesWithMonaco();
-  //createEditorInstanse({ selectedLanguage: "python", enableAutoComplete: false }).then(() => { });
+  //createEditorInstanse({ selectedLanguage: "python", enableAutoComplete: true }).then(() => { });
   window.__loadEditor({});
 };
 

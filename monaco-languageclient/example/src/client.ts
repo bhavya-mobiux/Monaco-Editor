@@ -44,11 +44,9 @@ let webSocket: WebSocket;
 const registerLanguagesWithMonaco = () => {
   const supportedLanguages = Object.keys(CONFIG);
   for (var i = 0; i < supportedLanguages.length; i++) {
-    const { languageId, extensions, mimetypes } = CONFIG[supportedLanguages[i]];
+    const { languageId } = CONFIG[supportedLanguages[i]];
     monaco.languages.register({
-      id: languageId,
-      extensions,
-      mimetypes,
+      id: languageId
     });
     monaco.languages.setLanguageConfiguration(languageId, {
       surroundingPairs: EDITOR_CONFIG.SURROUNDING_PAIRS,
@@ -255,14 +253,14 @@ function createLanguageClient(
 function createUrl(path: string): string {
   const protocol = location.protocol === "https:" ? "wss" : "ws";
   let socketUrl: string;
-  // socketUrl = normalizeUrl(
-  //   `${protocol}://${location.host}${location.pathname}${path}?language=${LANGUAGE_ID}&enableAutoComplete=${enableEditorAutoComplete}`
-  // );
+  socketUrl = normalizeUrl(
+    `${protocol}://${location.host}${location.pathname}${path}?language=${LANGUAGE_ID}&enableAutoComplete=${enableEditorAutoComplete}`
+  );
 
   //for local ngnix
-  const port = 8000;
-  socketUrl = normalizeUrl(`${protocol}://${location.host}:${port}${path}?language=${LANGUAGE_ID}&enableAutoComplete=${enableEditorAutoComplete}`);
-  console.log("URL here: ", socketUrl);
+  // const port = 8000;
+  // socketUrl = normalizeUrl(`${protocol}://${location.host}:${port}${path}?language=${LANGUAGE_ID}&enableAutoComplete=${enableEditorAutoComplete}`);
+  // console.log("URL here: ", socketUrl);
   return socketUrl;
 }
 
